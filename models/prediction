@@ -1,0 +1,34 @@
+import joblib
+import pandas as pd
+
+model = joblib.load('crop_price_model.pkl')
+crop_encoder = joblib.load('crop_encoder.pkl')
+state_encoder = joblib.load('state_encoder.pkl')
+month_encoder = joblib.load('month_encoder.pkl')
+
+def predict_crop_price(crop, state, year, month, model, crop_encoder, state_encoder, month_encoder):
+    """
+    Predicts the price of a crop based on input parameters using the saved encoders.
+    """
+    encoded_crop = crop_encoder.transform([crop])[0]
+    encoded_state = state_encoder.transform([state])[0]
+    encoded_month = month_encoder.transform([month])[0]
+
+    features = pd.DataFrame({
+        'encoded_crop': [encoded_crop],
+        'encoded_state': [encoded_state],
+        'encoded_month': [encoded_month],
+        'Year': [year]
+    })
+
+    predicted_price = model.predict(features)[0]
+
+    return predicted_price
+
+crop = 'Wheat'
+state = 'Maharashtra'
+year = 2024
+month = 'Oct'
+
+predicted_price = predict_crop_price(crop, state, year, month, model, crop_encoder, state_encoder, month_encoder)
+print(f'Predicted price {crop} in {state} for {month}, {year}: {predicted_price}')
